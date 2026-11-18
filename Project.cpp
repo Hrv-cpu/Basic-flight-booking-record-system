@@ -8,41 +8,56 @@
 
 using namespace std;
 
-int ReadFlights() {
-    string line;
-    string flight_code, destination;
-    int duration;
+vector<Flight> FlightList;
+string line;
+string passenger_id, flight_code, date, seat_class, destination;
+int duration;
 
-    ifstream MyReadFile("flights.txt");
-    while(getline(MyReadFile, line)) 
+int ReadFlights() {
+
+    ifstream in("flights.txt");
+    while(getline(in, line)) 
     {
         stringstream ss(line);
         ss >> flight_code >> destination >> duration;
         //cout << flight_code << "\n" << destination << "\n" << duration << "\n\n";
+        for (Flight &f : FlightList)
+        {
+            if(f.getFC() == flight_code)
+            {
+                f.setDest(destination);
+                f.setDur(duration);
+            }
+        }
     }
-
-    MyReadFile.close();
+    in.close();
 }
 
 int ReadBookings() {
-    string line;
-    string passenger_id, flight_code, date, seat_class;
 
-    ifstream MyReadFile("bookings.txt");
-    while(getline(MyReadFile, line)) 
+    ifstream in("bookings.txt");
+    while(getline(in, line)) 
     {
         stringstream ss(line);
         ss >> passenger_id >> flight_code >> date >> seat_class;
         //cout << passenger_id << "\n" << flight_code << "\n" << date << "\n" << seat_class << "\n\n";
-    }
+        Flight flight(passenger_id, date, flight_code, "", 0, seat_class);
+        FlightList.push_back(flight);
 
-    MyReadFile.close();
+    }
+    in.close();
 }
 
-
 int main() {
+
     ReadBookings();
     ReadFlights();
+    for (Flight f : FlightList)
+    {
+        cout << "\nPassenger ID: " << f.getPid();
+        f.displayFlight();
+    }
+    
 
-    vector<Flight> FlightList;
+    return 0;
 }
