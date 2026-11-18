@@ -50,14 +50,30 @@ int ReadBookings() {
 
 int main() {
 
+    int menuChoice;
+
     ReadBookings();
     ReadFlights();
-    for (Flight f : FlightList)
-    {
-        cout << "\nPassenger ID: " << f.getPid();
-        f.displayFlight();
-    }
     
+    cout << "\nEnter menu option:\n 1. Generate full itinerary\n 2. Request date specific flights\n 3. Exit\n";
+    cin >> menuChoice;
+    switch (menuChoice)
+    {
+    case 1:
+        /* code */
+        main();
+    
+    case 2:
+        /* code */
+        main();
+    
+    case 3:
+        break;
+        
+    default:
+        cout << "\n##Please enter a valid number##\n";
+        main();
+    }
 
     return 0;
 }
