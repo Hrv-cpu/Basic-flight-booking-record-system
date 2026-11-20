@@ -24,7 +24,7 @@ class Flight {
         void displayFlight() {
             cout << "\n  Date: " << date;
             cout << "\n    " << flight_code << " " << destination << " " << "(" << duration << " mins): " << seat_class;
-            cout << "\n  Total Flights: ";
+            cout << "\n  Total Flights: \n";
         }
 
         string getPid() {
@@ -33,6 +33,10 @@ class Flight {
 
         string getFC() {
             return flight_code;
+        }
+
+        string getDate() {
+            return date;
         }
 
         void setDest(string des) {
