@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 #include "DataReader.cpp"
+#include "BookingClass.h"
+#include "FlightClass.h"
 #include <map>
 
 using namespace std;
@@ -11,44 +13,87 @@ map<string, string> Requests;
 string passenger_id_requests = "", date_requests = "";
 string line_requests;
 
-string ReturnRequests() {
+void ReturnRequests() {
     int overall_flight = 0;
+    int total_flight = 0;
 
     for (auto pair : Requests) {
-        if (pair.second == "") {
+        string reqPassengerId = pair.first;
+        string reqPassengerDate = pair.second;
+
+        if (reqPassengerDate == "") {
+
             cout << "\nPassenger ID: " << pair.first;
-            for (Flight f : FlightList) {
-                if (f.getPid() == pair.first) {
-                    f.displayFlight();
-                    overall_flight += 1;
+            for (int i = 0; i < BookingVec.size(); i++) {
+
+                auto firstBooking = BookingVec[i];
+
+                if (firstBooking.getPassengerId() == reqPassengerId) {
+
+                    string targetDate = firstBooking.getDate();
+
+                    cout << "\n  Date " << targetDate << ":";
+                    for (int j = i; j < BookingVec.size();) {
+
+                        auto currentBooking = BookingVec[j];
+
+                        if (currentBooking.getPassengerId() == reqPassengerId && currentBooking.getDate() == targetDate) {
+                            for (auto &f : FlightVec) {
+                                if (f.getFlightCode() == currentBooking.getFlightCode()) {
+
+                                    f.displayFlight(currentBooking.getSeatClass());
+                                    total_flight += 1;
+                                    overall_flight += 1;
+                                    break;
+                                }
+                            }
+                            BookingVec.erase(BookingVec.begin() + j);
+                        } 
+                        else { j++; }
+                    }
+
+                    cout << "\n  Total Flights: " << total_flight << "\n";
+                    total_flight = 0;
+                    i--; // Adjust index since firstBooking was erased
                 }
             }
-            cout << "\nOverall Flights: " << overall_flight << "\n";
+
+            cout << "\n  Overall Flights: " << overall_flight;
             overall_flight = 0;
         }
+
         else {
-            cout << "\nPassenger ID: " << pair.first;
-            for (Flight f : FlightList) {
-                if (f.getPid() == pair.first && f.getDate() == pair.second) {
-                    f.displayFlight();
+
+            cout << "\nPassenger ID: " << reqPassengerId;
+            cout << "\n  Date " << reqPassengerDate << ":";
+
+            for (auto b : BookingVec) {
+                if (reqPassengerId == b.getPassengerId() && reqPassengerDate == b.getDate()) {
+                    for (auto f : FlightVec){
+                        if (b.getFlightCode() == f.getFlightCode()) {
+
+                            f.displayFlight(b.getSeatClass());
+                            total_flight += 1;
+                        };
+                    }
                 }
             }
-        }
-        
+            cout << "\n  Total Flights: " << total_flight << "\n";
+            total_flight = 0;
+        } 
     }
-    
 }
 
-string ReadRequests() {
+void ReadRequests() {
 
     ifstream in("requests.txt");
-    while(getline(in, line)) {
+    while(getline(in, line_requests)) {
+
         passenger_id_requests = "";
         date_requests = "";
-        stringstream ss(line);
+        stringstream ss(line_requests);
 
         ss >> passenger_id_requests >> date_requests;
-        //cout << passenger_id_requests << "\n" << date_requests << "\n\n";
         Requests.insert({passenger_id_requests, date_requests});
         
     }
@@ -56,27 +101,10 @@ string ReadRequests() {
 }
 
 int main() {
-
-    string menuChoice = "";
-
     ReadBookings();
     ReadFlights();
     ReadRequests();
-    
-    while (true) {
-
-        cout << "\nEnter menu option:\n   1. Generate itinerary from requests\n   2. Exit\n";
-        cin >> menuChoice;
-        if (menuChoice == "1") {
-            ReturnRequests();
-        }
-        else if (menuChoice == "2") {
-            break;
-        }
-        else {
-            cout << "\n##Please enter a valid number##\n"; 
-        }
-    };
+    ReturnRequests();
 
     return 0;
 }

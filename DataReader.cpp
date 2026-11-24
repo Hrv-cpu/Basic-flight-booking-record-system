@@ -3,11 +3,13 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include "Flight.h"
+#include "BookingClass.cpp"
+#include "FlightClass.cpp"
 
 using namespace std;
 
-vector<Flight> FlightList;
+vector<FlightClass> FlightVec;
+vector<BookingClass> BookingVec;
 string line;
 string passenger_id = "", flight_code = "", date = "", seat_class = "", destination = "";
 int duration = 0;
@@ -21,14 +23,7 @@ void ReadFlights() {
         
         ss >> flight_code >> destination >> duration;
         //cout << flight_code << "\n" << destination << "\n" << duration << "\n\n";
-        for (Flight &f : FlightList)
-        {
-            if(f.getFC() == flight_code)
-            {
-                f.setDest(destination);
-                f.setDur(duration);
-            }
-        }
+        FlightVec.emplace_back(flight_code, destination, duration);
     }
     in.close();
 }
@@ -41,8 +36,7 @@ void ReadBookings() {
         stringstream ss(line);
         ss >> passenger_id >> flight_code >> date >> seat_class;
         //cout << passenger_id << "\n" << flight_code << "\n" << date << "\n" << seat_class << "\n\n";
-        Flight flight(passenger_id, date, flight_code, "", 0, seat_class);
-        FlightList.push_back(flight);
+        BookingVec.emplace_back(passenger_id, flight_code, date, seat_class);
 
     }
     in.close();
