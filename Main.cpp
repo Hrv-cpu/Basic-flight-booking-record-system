@@ -2,109 +2,77 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include "DataReader.cpp"
-#include "BookingClass.h"
-#include "FlightClass.h"
 #include <map>
+#include <vector>
+#include "DataReader.cpp"
+#include "Booking.h"
+#include "Flight.h"
 
 using namespace std;
 
-map<string, string> Requests;
-string passenger_id_requests = "", date_requests = "";
-string line_requests;
+void printItinerary(map<string, string> requests, vector<Flight> flights, map<string, map<string, vector<Booking>>> bookings) {
+    int overallFlights = 0;
+    int totalFlights = 0;
 
-void ReturnRequests() {
-    int overall_flight = 0;
-    int total_flight = 0;
+    for (auto requestPair : requests) {
 
-    for (auto pair : Requests) {
-        string reqPassengerId = pair.first;
-        string reqPassengerDate = pair.second;
+        string reqPassengerId = requestPair.first;
+        string reqPassengerDate = requestPair.second;
 
-        if (reqPassengerDate == "") {
+        cout << "\nPassenger ID: " << reqPassengerId;
+        overallFlights = 0;
 
-            cout << "\nPassenger ID: " << pair.first;
-            for (int i = 0; i < BookingVec.size(); i++) {
+        for (auto datePair : bookings[reqPassengerId]) {
 
-                auto firstBooking = BookingVec[i];
+            string date = datePair.first;
 
-                if (firstBooking.getPassengerId() == reqPassengerId) {
+            if (reqPassengerDate != "" && reqPassengerDate != date) continue;
 
-                    string targetDate = firstBooking.getDate();
+            cout << "\n  Date " << date << ":";
+            totalFlights = 0;
 
-                    cout << "\n  Date " << targetDate << ":";
-                    for (int j = i; j < BookingVec.size();) {
-
-                        auto currentBooking = BookingVec[j];
-
-                        if (currentBooking.getPassengerId() == reqPassengerId && currentBooking.getDate() == targetDate) {
-                            for (auto &f : FlightVec) {
-                                if (f.getFlightCode() == currentBooking.getFlightCode()) {
-
-                                    f.displayFlight(currentBooking.getSeatClass());
-                                    total_flight += 1;
-                                    overall_flight += 1;
-                                    break;
-                                }
-                            }
-                            BookingVec.erase(BookingVec.begin() + j);
-                        } 
-                        else { j++; }
+            // Loop 2: Inner vector (bookings on this date)
+            for (auto booking : datePair.second) {
+                for (auto flight : flights) {
+                    if (flight.getFlightCode() == booking.getFlightCode()) {
+                        flight.displayFlight(booking.getSeatClass());
+                        totalFlights += 1;
+                        overallFlights += 1;
+                        break;
                     }
-
-                    cout << "\n  Total Flights: " << total_flight << "\n";
-                    total_flight = 0;
-                    i--; // Adjust index since firstBooking was erased
                 }
             }
 
-            cout << "\n  Overall Flights: " << overall_flight;
-            overall_flight = 0;
+            cout << "\n  Total Flights: " << totalFlights << "\n";
         }
 
-        else {
-
-            cout << "\nPassenger ID: " << reqPassengerId;
-            cout << "\n  Date " << reqPassengerDate << ":";
-
-            for (auto b : BookingVec) {
-                if (reqPassengerId == b.getPassengerId() && reqPassengerDate == b.getDate()) {
-                    for (auto f : FlightVec){
-                        if (b.getFlightCode() == f.getFlightCode()) {
-
-                            f.displayFlight(b.getSeatClass());
-                            total_flight += 1;
-                        };
-                    }
-                }
-            }
-            cout << "\n  Total Flights: " << total_flight << "\n";
-            total_flight = 0;
-        } 
+        if (reqPassengerDate == "") {
+            cout << "\n  Overall Flights: " << overallFlights;
+        }
     }
 }
 
-void ReadRequests() {
+map<string, string> readRequests(string requestFile) {
+  
+    map<string, string> requests;
+    string reqPassengerIdInput, reqDateInput, requestLine;
 
-    ifstream in("requests.txt");
-    while(getline(in, line_requests)) {
+    ifstream in(requestFile);
+    while (getline(in, requestLine)) {
 
-        passenger_id_requests = "";
-        date_requests = "";
-        stringstream ss(line_requests);
+        stringstream ss(requestLine);
 
-        ss >> passenger_id_requests >> date_requests;
-        Requests.insert({passenger_id_requests, date_requests});
+        ss >> reqPassengerIdInput >> reqDateInput;
+        requests.insert({reqPassengerIdInput, reqDateInput});
         
     }
     in.close();
+
+    return requests;
 }
 
 int main() {
-    ReadBookings();
-    ReadFlights();
-    ReadRequests();
-    ReturnRequests();
+    printItinerary(readRequests("requests.txt"), readFlights("flights.txt"), readBookings("bookings.txt"));
 
     return 0;
 }

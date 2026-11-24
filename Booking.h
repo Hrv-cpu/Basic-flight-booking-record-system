@@ -4,15 +4,15 @@
 
 using namespace std;
 
-class BookingClass {
+class Booking {
     private:
-        string passenger_id;
-        string flight_code;
-        string date;
-        string seat_class;
+        string passengerId_;
+        string flightCode_;
+        string date_;
+        string seatClass_;
 
     public:
-        BookingClass(string pid, string fc, string dat, string sc);
+        Booking(string passengerId, string flightCode, string date, string seatClass);
 
         string getPassengerId() const;
         string getFlightCode() const;

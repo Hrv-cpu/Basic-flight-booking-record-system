@@ -3,41 +3,46 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include "BookingClass.cpp"
-#include "FlightClass.cpp"
+#include <map>
+#include "Booking.h"
+#include "Flight.h"
 
 using namespace std;
 
-vector<FlightClass> FlightVec;
-vector<BookingClass> BookingVec;
-string line;
-string passenger_id = "", flight_code = "", date = "", seat_class = "", destination = "";
-int duration = 0;
+vector<Flight> readFlights(string flightFile) {
 
-void ReadFlights() {
+    vector<Flight> flights;
+    string line, flightCode, destination;
+    int duration = 0;
 
-    ifstream in("flights.txt");
+    ifstream in(flightFile);
     while(getline(in, line)) 
     {
         stringstream ss(line);
         
-        ss >> flight_code >> destination >> duration;
-        //cout << flight_code << "\n" << destination << "\n" << duration << "\n\n";
-        FlightVec.emplace_back(flight_code, destination, duration);
+        ss >> flightCode >> destination >> duration;
+        flights.emplace_back(flightCode, destination, duration);
     }
     in.close();
+
+    return flights;
 }
 
-void ReadBookings() {
+map<string, map<string, vector<Booking>>> readBookings(string bookingFile) {
 
-    ifstream in("bookings.txt");
+    map<string, map<string, vector<Booking>>> bookings;
+    string line, passengerId, flightCode, date, seatClass;
+
+    ifstream in(bookingFile);
     while(getline(in, line)) 
     {
         stringstream ss(line);
-        ss >> passenger_id >> flight_code >> date >> seat_class;
-        //cout << passenger_id << "\n" << flight_code << "\n" << date << "\n" << seat_class << "\n\n";
-        BookingVec.emplace_back(passenger_id, flight_code, date, seat_class);
+
+        ss >> passengerId >> flightCode >> date >> seatClass;
+        bookings[passengerId][date].emplace_back(passengerId, flightCode, date, seatClass);
 
     }
     in.close();
+
+    return bookings;
 }
